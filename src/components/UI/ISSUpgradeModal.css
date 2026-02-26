@@ -1,0 +1,177 @@
+.upgrade-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 5, 15, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.upgrade-modal-content {
+    width: 80vw;
+    max-width: 1200px;
+    height: 80vh;
+    background: rgba(4, 12, 24, 0.9);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    border-top: 4px solid #00f0ff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 50px rgba(0, 240, 255, 0.15);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%);
+    color: #fff;
+    font-family: 'Inter', 'Roboto Mono', monospace;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    color: #00f0ff;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: #ff3366;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 2px;
+}
+
+.close-btn:hover {
+    text-shadow: 0 0 10px #ff3366;
+}
+
+.modal-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.modal-3d-view {
+    flex: 1;
+    border-right: 1px solid rgba(0, 240, 255, 0.2);
+    position: relative;
+    background: radial-gradient(circle at center, rgba(0, 240, 255, 0.05) 0%, transparent 70%);
+}
+
+.modal-parts-list {
+    width: 400px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.modal-parts-list h3 {
+    margin-top: 0;
+    color: #ffcc00;
+    letter-spacing: 2px;
+    font-size: 1rem;
+}
+
+.parts-desc {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 20px;
+}
+
+.parts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.part-card {
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.part-card.attached {
+    border-color: #00ffaa;
+    background: rgba(0, 255, 170, 0.05);
+}
+
+.part-card.locked {
+    opacity: 0.4;
+    border-color: #666;
+    background: transparent;
+}
+
+.part-info h4 {
+    margin: 0 0 5px 0;
+    color: #00f0ff;
+    letter-spacing: 1px;
+}
+
+.part-card.attached .part-info h4 {
+    color: #00ffaa;
+}
+
+.part-type {
+    font-size: 0.6rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 2px;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.part-info p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+}
+
+.part-action button {
+    background: transparent;
+    border: 1px solid #00f0ff;
+    color: #00f0ff;
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 0.7rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+}
+
+.part-action button:hover {
+    background: rgba(0, 240, 255, 0.2);
+}
+
+.part-action .btn-detach {
+    border-color: #ff3366;
+    color: #ff3366;
+}
+
+.part-action .btn-detach:hover {
+    background: rgba(255, 51, 102, 0.2);
+}
+
+.locked-text {
+    font-size: 0.8rem;
+    color: #ff3366;
+    letter-spacing: 2px;
+}

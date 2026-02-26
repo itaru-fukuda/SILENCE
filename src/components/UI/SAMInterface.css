@@ -1,0 +1,64 @@
+.sam-container {
+    position: absolute;
+    top: 320px;
+    left: 20px;
+    width: 350px;
+    background: rgba(0, 5, 10, 0.85);
+    border: 1px solid #00f0ff;
+    border-left: 4px solid #00f0ff;
+    color: #00f0ff;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 15px;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    pointer-events: auto;
+}
+
+.sam-header {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #00f0ff;
+    padding-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.sam-status {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.sam-message {
+    margin-top: 10px;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.sam-action-btn {
+    margin-top: 15px;
+    background: transparent;
+    border: 1px solid #00f0ff;
+    color: #00f0ff;
+    padding: 8px 12px;
+    cursor: pointer;
+    width: 100%;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.sam-action-btn:hover {
+    background: #00f0ff;
+    color: #000;
+}
