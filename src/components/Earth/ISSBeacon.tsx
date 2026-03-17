@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { WGS84_A } from '../../utils/math';
+import { WGS84_A, getMercatorCoordinates } from '../../utils/math';
 import type { ISSTelemetry } from '../UI/ISSDashboard';
 import { useGameState } from '../../providers/GameStateProvider';
 
@@ -41,10 +41,8 @@ export function ISSBeacon({ onClick }: { onClick?: () => void }) {
                 const y = ((1 - e2) * N + alt) * Math.sin(lat);
                 newPos.set(x, y, z);
             } else {
-                // 2D Mercator
-                const px = tel.longitude;
-                const pz = -tel.latitude;
-                newPos.set(px, 1.0, pz);
+                // True Web Mercator 
+                newPos.copy(getMercatorCoordinates(lat, lon));
             }
 
             setTargetPos(newPos);
@@ -74,9 +72,9 @@ export function ISSBeacon({ onClick }: { onClick?: () => void }) {
         }
     });
 
-    const baseScale = mapMode === '2D' ? 10 : 400;
-    const hoverScale = mapMode === '2D' ? 12 : 480;
-    const groupScale = mapMode === '2D' ? 0.05 : 1.0;
+    const baseScale = 400;
+    const hoverScale = 480;
+    const groupScale = 1.0;
 
     return (
         <group

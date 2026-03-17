@@ -22,7 +22,8 @@ const useISSTelemetry = () => {
         const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
 
         const updateTelemetry = () => {
-            const now = new Date();
+            // TLE data is from late 2023. Sync with OrbitPath.tsx to avoid math drift.
+            const now = new Date('2023-09-30T00:00:00Z');
             const positionAndVelocity = satellite.propagate(satrec, now);
 
             if (!positionAndVelocity || !positionAndVelocity.position || typeof positionAndVelocity.position === 'boolean') return;
@@ -80,13 +81,13 @@ export function ISSDashboard() {
                         <button
                             onClick={toggleMapMode}
                             style={{
-                                background: 'transparent', border: '1px solid #00f0ff', color: '#00f0ff', cursor: 'pointer',
-                                padding: '4px 12px', fontSize: '0.9rem', borderRadius: '4px', letterSpacing: '1px'
+                                background: 'rgba(0, 240, 255, 0.08)', border: '1px solid rgba(0, 240, 255, 0.4)', color: '#00f0ff', cursor: 'pointer',
+                                padding: '6px 14px', fontSize: '0.85rem', fontWeight: 600, borderRadius: '8px', letterSpacing: '1.5px', transition: 'all 0.2s', boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
                             }}
                         >
-                            {mapMode === '3D' ? '🌍 3D MODE' : '🗺️ 2D MODE'}
+                            {mapMode === '3D' ? '3D→2D' : '2D→3D'}
                         </button>
-                        <span className="live-indicator">● LIVE</span>
+                        <span className="live-indicator">●LIVE</span>
                     </div>
                 </div>
 
@@ -112,8 +113,8 @@ export function ISSDashboard() {
                         <span className="value">{telemetry.velocity.toLocaleString('ja-JP', { maximumFractionDigits: 0 })} km/h</span>
                     </div>
                     <div className="data-box">
-                        <span className="label">日照状態</span>
-                        <span className={`value ${telemetry.visibility}`}>{(telemetry.visibility === 'daylight' ? '日照' : '日陰')}</span>
+                        <span className="label">環境光</span>
+                        <span className={`value ${telemetry.visibility}`}>{(telemetry.visibility === 'daylight' ? '日照' : '日陰（エクリプス）')}</span>
                     </div>
                 </div>
 
@@ -121,10 +122,25 @@ export function ISSDashboard() {
                     <button className="hud-btn" data-tutorial="locate-iss-btn" onClick={() => window.dispatchEvent(new Event('ORBIT_RESET'))} style={{ fontSize: '1rem', padding: '10px', flex: 1, background: 'rgba(0, 240, 255, 0.15)', borderColor: '#00f0ff' }}>
                         [ 🎯 LOCATE ISS ]
                     </button>
-                    <button className="hud-btn" data-tutorial="shop-open-btn" onClick={() => window.dispatchEvent(new Event('SHOP_OPEN'))} style={{ fontSize: '1rem', padding: '10px', flex: 1, background: 'rgba(255, 204, 0, 0.15)', borderColor: '#ffcc00', color: '#ffcc00' }}>
-                        [ 🛒 モジュール拡張 ]
-                    </button>
                 </div>
+            </div>
+
+            {/* カメラズーム操作UI（画面右下） */}
+            <div style={{ position: 'absolute', bottom: '30px', right: '30px', display: 'flex', flexDirection: 'column', gap: '10px', zIndex: 100, pointerEvents: 'auto' }}>
+                <button 
+                  onClick={() => window.dispatchEvent(new Event('ZOOM_IN'))}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  style={{ width: '45px', height: '45px', fontSize: '24px', borderRadius: '12px', background: 'rgba(5, 7, 12, 0.7)', color: '#00f0ff', border: '1px solid rgba(0, 240, 255, 0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.1)', backdropFilter: 'blur(10px)', userSelect: 'none', transition: 'all 0.2s' }}
+                >
+                    +
+                </button>
+                <button 
+                  onClick={() => window.dispatchEvent(new Event('ZOOM_OUT'))}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  style={{ width: '45px', height: '45px', fontSize: '24px', borderRadius: '12px', background: 'rgba(5, 7, 12, 0.7)', color: '#00f0ff', border: '1px solid rgba(0, 240, 255, 0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.1)', backdropFilter: 'blur(10px)', userSelect: 'none', transition: 'all 0.2s' }}
+                >
+                    −
+                </button>
             </div>
         </>
     );

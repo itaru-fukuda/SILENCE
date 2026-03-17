@@ -2,11 +2,10 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 10, 20, 0.85);
-    /* ダークブルー系 */
-    backdrop-filter: blur(8px);
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 5, 10, 0.9);
+    backdrop-filter: blur(15px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,65 +15,109 @@
 .shop-modal-content {
     width: 800px;
     height: 600px;
-    background: rgba(0, 15, 30, 0.95);
-    border: 2px solid #00f0ff;
-    box-shadow: 0 0 30px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.1);
+    background: rgba(4, 7, 12, 0.9); /* Obsidian Black */
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-top: 2px solid #00f0ff;
+    border-radius: 16px; /* Smooth curves */
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(0, 240, 255, 0.1);
     display: flex;
     flex-direction: column;
     padding: 20px;
     position: relative;
     color: #fff;
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    overflow: hidden;
+}
+
+.shop-modal-content::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(rgba(97, 165, 243, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(97, 165, 243, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.shop-modal-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15));
+    background-size: 100% 4px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.6;
 }
 
 .shop-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid rgba(0, 240, 255, 0.5);
+    border-bottom: 2px solid rgba(97, 165, 243, 0.5);
     padding-bottom: 15px;
     margin-bottom: 20px;
+    position: relative;
 }
 
 .shop-header h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     color: #00f0ff;
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
     letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 .shop-score {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #ffaa00;
+    color: #fff;
 }
 
 .highlight-score {
-    font-size: 1.5rem;
-    color: #ffcc00;
-    text-shadow: 0 0 10px #ffcc00;
+    font-size: 1.6rem;
+    color: #fadb5f;
+    text-shadow: 0 0 10px rgba(250, 219, 95, 0.6);
+    margin-left: 8px;
 }
 
 .close-btn {
-    background: rgba(255, 50, 50, 0.1);
-    border: 1px solid #ff3333;
-    color: #ff3333;
+    background: rgba(255, 42, 95, 0.1);
+    border: 1px solid rgba(255, 42, 95, 0.5);
+    color: #ff2a5f;
     padding: 8px 16px;
     cursor: pointer;
     font-weight: bold;
-    transition: all 0.2s;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease-out;
+    text-shadow: 0 0 8px rgba(255, 42, 95, 0.5);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .close-btn:hover {
-    background: #ff3333;
-    color: white;
+    background: rgba(255, 42, 95, 0.2);
+    color: #ffffff;
+    border-color: #ff2a5f;
+    box-shadow: 0 0 20px rgba(255, 42, 95, 0.5), inset 0 0 10px rgba(255, 42, 95, 0.2);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
 }
 
 .shop-body {
     display: flex;
     flex: 1;
     gap: 20px;
+    z-index: 1;
 }
 
 /* 左側：AI店員エリア */
@@ -83,7 +126,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-right: 1px dashed rgba(0, 240, 255, 0.3);
+    border-right: 1px solid rgba(97, 165, 243, 0.3);
     padding-right: 20px;
 }
 
@@ -92,19 +135,22 @@
     max-height: 350px;
     object-fit: contain;
     border: 1px solid rgba(0, 240, 255, 0.2);
-    background: radial-gradient(circle, rgba(0, 240, 255, 0.05) 0%, transparent 70%);
+    border-radius: 12px;
+    background: rgba(0, 240, 255, 0.05);
     margin-bottom: 15px;
-    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.3));
+    filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.15));
 }
 
 .clerk-dialogue {
     width: 100%;
-    background: rgba(0, 240, 255, 0.1);
-    border: 1px solid #00f0ff;
+    background: rgba(0, 240, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-left: 3px solid #00f0ff;
+    border-radius: 12px;
     padding: 15px;
     color: #fff;
     font-size: 0.95rem;
-    line-height: 1.5;
+    line-height: 1.6;
     text-align: left;
     min-height: 100px;
     position: relative;
@@ -113,13 +159,18 @@
 .clerk-dialogue::before {
     content: "SYS_AI>";
     position: absolute;
-    top: -10px;
-    left: 10px;
-    background: #00f0ff;
-    color: #000;
-    padding: 0 5px;
-    font-size: 0.8rem;
+    top: 0;
+    right: 0;
+    background: rgba(0, 240, 255, 0.2);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+    border-left: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 0 12px 0 8px;
+    color: #00f0ff;
+    padding: 4px 10px;
+    font-size: 0.75rem;
     font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
 }
 
 /* 右側：商品（モジュール）リスト */
@@ -131,10 +182,12 @@
 
 .shop-items-area h3 {
     margin-top: 0;
-    color: #aaa;
-    font-size: 1rem;
+    color: #61A5F3;
+    font-size: 1.1rem;
     margin-bottom: 15px;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(97, 165, 243, 0.5);
 }
 
 .items-list {
@@ -147,39 +200,48 @@
 }
 
 .items-list::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .items-list::-webkit-scrollbar-track {
-    background: rgba(0, 240, 255, 0.1);
+    background: rgba(97, 165, 243, 0.1);
 }
 
 .items-list::-webkit-scrollbar-thumb {
-    background: rgba(0, 240, 255, 0.5);
+    background: rgba(97, 165, 243, 0.5);
 }
 
 .shop-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(0, 240, 255, 0.3);
+    background: rgba(0, 240, 255, 0.03);
+    border: 1px solid rgba(0, 240, 255, 0.1);
+    border-left: 4px solid rgba(0, 240, 255, 0.5);
+    border-radius: 12px;
     padding: 15px;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+}
+
+.shop-item:hover {
+    background: rgba(0, 240, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.3);
+    transform: translateX(2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .shop-item.purchased {
-    border-color: #555;
-    opacity: 0.7;
+    border-left-color: #555;
+    opacity: 0.6;
 }
 
 .shop-item.affordable {
-    border-color: #00f0ff;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    border-left-color: #00ffaa;
+    box-shadow: inset 0 0 15px rgba(0, 255, 170, 0.1);
 }
 
 .shop-item.expensive {
-    border-color: #ff5555;
+    border-left-color: #ff3366;
 }
 
 .item-info {
@@ -187,24 +249,27 @@
 }
 
 .item-name {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: bold;
     color: #fff;
     margin-bottom: 5px;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 .item-type {
-    font-size: 0.8rem;
-    color: #00f0ff;
-    background: rgba(0, 240, 255, 0.1);
-    padding: 2px 6px;
+    font-size: 0.75rem;
+    color: #000;
+    background: #61A5F3;
+    padding: 2px 8px;
     margin-left: 10px;
-    border-radius: 4px;
+    border-radius: 2px;
+    font-weight: bold;
 }
 
 .item-desc {
     font-size: 0.85rem;
-    color: #bbb;
+    color: #ccc;
+    line-height: 1.4;
 }
 
 .item-action {
@@ -214,31 +279,46 @@
 }
 
 .purchased-label {
-    color: #888;
-    background: #333;
-    padding: 5px 15px;
-    border: 1px solid #555;
+    color: #aaa;
+    background: #222;
+    padding: 6px 16px;
+    border: 1px solid #444;
+    border-radius: 8px;
     font-weight: bold;
+    letter-spacing: 1px;
 }
 
 .buy-btn {
-    background: rgba(0, 240, 255, 0.1);
-    border: 1px solid #00f0ff;
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.4);
     color: #00f0ff;
-    padding: 8px 15px;
+    border-radius: 8px;
+    padding: 10px 20px;
     cursor: pointer;
     font-weight: bold;
-    transition: all 0.2s;
+    font-size: 0.95rem;
+    transition: all 0.2s ease-out;
+    white-space: nowrap;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .buy-btn:hover:not(:disabled) {
-    background: #00f0ff;
-    color: #000;
+    background: rgba(0, 240, 255, 0.2);
+    color: #ffffff;
+    border-color: #00f0ff;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.2);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
 }
 
 .buy-btn:disabled {
-    background: rgba(255, 85, 85, 0.1);
-    border-color: #ff5555;
-    color: #ff5555;
+    background: rgba(255, 42, 95, 0.05);
+    border-color: rgba(255, 42, 95, 0.2);
+    color: rgba(255, 42, 95, 0.5);
     cursor: not-allowed;
+    text-shadow: none;
+    box-shadow: none;
+    transform: none;
 }

@@ -1,80 +1,47 @@
-import { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
+import { getTileTexture } from './Earth';
+import { WGS84_A } from '../../utils/math';
+
+function MapTile({ tileX, tileY, posX, posZ, size }: { tileX: number, tileY: number, posX: number, posZ: number, size: number }) {
+    // 3D側のキャッシュから直接THREE.Textureを受け取る。
+    // ロードが完了していなくても、Three.js側が内部的に監視し、画像完了時に自動再描画される。
+    const texture = getTileTexture(1, tileX, tileY, () => { });
+
+    return (
+        <mesh position={[posX, 0, posZ]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[size, size, 32, 32]} />
+            {/* Color grading approximation to match 3D globe somewhat */}
+            <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
+        </mesh>
+    );
+}
 
 export function FlatEarth() {
-    // Generate a procedural cyber-grid map texture using HTML Canvas
-    // This entirely avoids CORS issues and network reliability problems
-    const mapTex = useMemo(() => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 2048;
-        canvas.height = 1024;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-            // Background (Deep Space Blue)
-            ctx.fillStyle = '#000814';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 地球の円周（赤道長） = 幅と高さの基準
+    const EARTH_CIRCUMFERENCE = 2 * Math.PI * WGS84_A;
 
-            // Grid lines
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
-            ctx.lineWidth = 2;
+    // ズームレベル1のタイルは地球全域を2×2の4枚(幅=円周の半分)でカバーする
+    const tileSize = EARTH_CIRCUMFERENCE / 2;
+    const offset = tileSize / 2;
 
-            // Simple Equirectangular Grid
-            // Longitude (36 segments, 10 degrees each)
-            for (let x = 0; x <= canvas.width; x += canvas.width / 36) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            // Latitude (18 segments, 10 degrees each)
-            for (let y = 0; y <= canvas.height; y += canvas.height / 18) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
-
-            // Equator and Prime Meridian (highlighted)
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.6)';
-            ctx.lineWidth = 4;
-            // Equator
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height / 2);
-            ctx.lineTo(canvas.width, canvas.height / 2);
-            ctx.stroke();
-            // Prime Meridian
-            ctx.beginPath();
-            ctx.moveTo(canvas.width / 2, 0);
-            ctx.lineTo(canvas.width / 2, canvas.height);
-            ctx.stroke();
-
-            // Add decorative "data points" scattered to mimic continents or network clusters
-            ctx.fillStyle = 'rgba(0, 255, 170, 0.3)';
-            for (let i = 0; i < 600; i++) {
-                const cx = Math.random() * canvas.width;
-                const cy = Math.random() * canvas.height;
-                // Keep them mostly away from poles to look like populated areas
-                if (cy > 150 && cy < canvas.height - 150) {
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, Math.random() * 4 + 1, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        const tex = new THREE.CanvasTexture(canvas);
-        tex.colorSpace = THREE.SRGBColorSpace;
-        return tex;
-    }, []);
-
-    // Width=360, Height=180 to map 1 unit = 1 degree
     return (
         <group>
-            <mesh position={[0, -100, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                <planeGeometry args={[360, 180, 64, 32]} />
-                <meshBasicMaterial map={mapTex} side={THREE.DoubleSide} />
-            </mesh>
-            <ambientLight intensity={1.0} />
+            {/* 4枚のArcGISタイル平面を並べる */}
+            {/* Top-Left: 北半球・西側 (x=0, y=0) */}
+            <MapTile tileX={0} tileY={0} posX={-offset} posZ={-offset} size={tileSize} />
+
+            {/* Top-Right: 北半球・東側 (x=1, y=0) */}
+            <MapTile tileX={1} tileY={0} posX={offset} posZ={-offset} size={tileSize} />
+
+            {/* Bottom-Left: 南半球・西側 (x=0, y=1) */}
+            <MapTile tileX={0} tileY={1} posX={-offset} posZ={offset} size={tileSize} />
+
+            {/* Bottom-Right: 南半球・東側 (x=1, y=1) */}
+            <MapTile tileX={1} tileY={1} posX={offset} posZ={offset} size={tileSize} />
+
+            {/* Earth全体を照らすアンビエントライト */}
+            <ambientLight intensity={1.5} />
         </group>
     );
 }

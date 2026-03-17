@@ -167,15 +167,16 @@ function createTileGeometry(z: number, x: number, y: number, segments: number = 
     return geometry;
 }
 
-const tileCache = new Map<string, THREE.Texture>();
-const textureLoader = new THREE.TextureLoader();
+export const tileCache = new Map<string, THREE.Texture>();
+export const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin('anonymous');
 
-const getTileTexture = (z: number, x: number, y: number, onLoad: (tex: THREE.Texture) => void) => {
+export const getTileTexture = (z: number, x: number, y: number, onLoad: (tex: THREE.Texture) => void) => {
     const key = `${z}_${x}_${y}`;
     if (tileCache.has(key)) {
         const tex = tileCache.get(key)!;
-        if (tex.image) onLoad(tex);
+        // 既にキャッシュされていれば（画像未完了でもThree.js側に任せるので）すぐにonLoadを呼ぶ
+        onLoad(tex);
         return tex;
     }
     const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
@@ -185,7 +186,12 @@ const getTileTexture = (z: number, x: number, y: number, onLoad: (tex: THREE.Tex
     }, undefined, () => {
         onLoad(new THREE.Texture());
     });
+    // 早めにカラースペースを設定しキャッシュに入れる
+    tex.colorSpace = THREE.SRGBColorSpace;
     tileCache.set(key, tex);
+
+    // 初回ロード時も、即座に空テクスチャのまま構成を完了させることで無限ロードを防ぐ
+    onLoad(tex);
     return tex;
 };
 

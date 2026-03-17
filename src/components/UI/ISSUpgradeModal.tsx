@@ -55,6 +55,11 @@ export function ISSUpgradeModal({ onClose }: { onClose: () => void }) {
                                 </div>
                             ))}
                         </div>
+                        <div style={{ marginTop: '20px', textAlign: 'center', borderTop: '1px solid rgba(0,240,255,0.3)', paddingTop: '20px' }}>
+                            <button className="btn-shop-link" onClick={() => { window.dispatchEvent(new Event('SHOP_OPEN')); onClose(); }} style={{ background: 'transparent', border: '1px solid #ffcc00', color: '#ffcc00', padding: '10px 20px', fontSize: '1rem', cursor: 'pointer', fontFamily: 'monospace' }}>
+                                [ 🛒 モジュール拡張ショップへ ]
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

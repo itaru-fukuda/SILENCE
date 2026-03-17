@@ -10,7 +10,10 @@ export function ISSShopModal({ onClose }: { onClose: () => void }) {
                 <div className="shop-header">
                     <h2>SYSTEM EXTENSION STORE</h2>
                     <div className="shop-score">所持ポイント: <span className="highlight-score">{score}</span> pt</div>
-                    <button className="close-btn" onClick={onClose}>[ 退出する ]</button>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button className="close-btn" onClick={() => { window.dispatchEvent(new Event('ISS_MODAL_OPEN')); onClose(); }} style={{ color: '#00f0ff', borderColor: '#00f0ff' }}>[ ◁ 戻る ]</button>
+                        <button className="close-btn" onClick={onClose}>[ 退出する ]</button>
+                    </div>
                 </div>
 
                 <div className="shop-body">

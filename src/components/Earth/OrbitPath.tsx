@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Line } from '@react-three/drei';
+import { Line, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import * as satellite from 'satellite.js';
-import { WGS84_A } from '../../utils/math';
+import { WGS84_A, getMercatorCoordinates } from '../../utils/math';
 import { useGameState } from '../../providers/GameStateProvider';
 
 export function OrbitPath() {
-    const [points, setPoints] = useState<THREE.Vector3[]>([]);
+    // 3D/2D兼用のため、連続した線の「配列の配列」として管理。
+    // 3Dなら大抵1つの要素（1本の線）、2Dならラップ境界ごとに分割された複数要素になる。
+    const [segments, setSegments] = useState<THREE.Vector3[][]>([]);
     const { mapMode } = useGameState();
 
     useEffect(() => {
@@ -20,11 +22,16 @@ export function OrbitPath() {
         const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
 
         const updateOrbit = () => {
-            const orbitPoints = [];
-            const now = new Date();
+            const newSegments: THREE.Vector3[][] = [];
+            let currentSegment: THREE.Vector3[] = [];
+            // TLE data is from late 2023 (epoch day ~272). 
+            // Using a current date in 2026 causes propagation algorithms to simulate 2.5 years of atmospheric drag, 
+            // causing the satellite to "crash" (negative altitude) and resulting in a flat/broken line. 
+            // We lock the base calculation time to match the TLE epoch to restore a perfect sine wave ground track.
+            const now = new Date('2023-09-30T00:00:00Z');
 
-            // Calculate one full orbit (approx 90 mins)
-            for (let i = 0; i < 90; i++) {
+            // Calculate three full orbits (approx 90 mins * 3 = 270 mins) to show the S-curve shift
+            for (let i = 0; i < 270; i++) {
                 const d = new Date(now.getTime() + i * 60000);
                 const positionAndVelocity = satellite.propagate(satrec, d);
 
@@ -44,31 +51,33 @@ export function OrbitPath() {
                         const x = (N + alt) * Math.cos(lat) * Math.sin(lon);
                         const z = (N + alt) * Math.cos(lat) * Math.cos(lon);
                         const y = ((1 - e2) * N + alt) * Math.sin(lat);
-                        orbitPoints.push(new THREE.Vector3(x, y, z));
+                        currentSegment.push(new THREE.Vector3(x, y, z));
                     } else {
-                        // 2D (Mercator Plane) Mapping
-                        // Plane is 360 x 180, ranging from x: [-180, 180], z: [-90, 90]
-                        const px = lon * 180 / Math.PI;
-                        const pz = -lat * 180 / Math.PI; // Invert lat so N is -z, S is +z (matches PlaneGeometry orientation if rotated)
-                        // Note: For a true Web Mercator, y = log(tan(pi/4 + lat/2)), but 
-                        // equirectangular mapping (direct lat/lon to rect) is used by the basic PlaneGeometry mapping.
+                        // 2D (True Web Mercator Plane)
+                        const p2d = getMercatorCoordinates(lat, lon);
 
-                        // Avoid wrapping artifacts connecting 180 to -180 across the screen
-                        if (orbitPoints.length > 0) {
-                            const lastPoint = orbitPoints[orbitPoints.length - 1];
-                            if (Math.abs(px - lastPoint.x) > 180) {
-                                // Cut the line by inserting a dummy point or handling multi-line
-                                // For simplicity, we just stop rendering the continuous line when crossing dateline
-                                // or split into multiple lines. Since Drei Line expects one contiguous array,
-                                // we'll skip wrapping points or limit orbit drawing in 2D to avoid huge horizontal lines.
+                        // Avoid wrapping artifacts connecting East to West across the screen
+                        if (currentSegment.length > 0) {
+                            const lastPoint = currentSegment[currentSegment.length - 1];
+                            const W_HALF = Math.PI * WGS84_A;
+                            if (Math.abs(p2d.x - lastPoint.x) > W_HALF) {
+                                // 画面端（日付変更線等）をまたいだ場合、現在の線を確定して次から新しい線を引く
+                                newSegments.push([...currentSegment]);
+                                currentSegment = [];
                             }
                         }
 
-                        orbitPoints.push(new THREE.Vector3(px, 1.0, pz)); // Y=1.0 to hover slightly above the 2D plane
+                        // p2d is already new THREE.Vector3(x, 1.0, z) from getMercatorCoordinates
+                        currentSegment.push(p2d);
                     }
                 }
             }
-            setPoints(orbitPoints);
+            // 最後のセグメントを追加
+            if (currentSegment.length > 0) {
+                newSegments.push(currentSegment);
+            }
+
+            setSegments(newSegments);
         };
 
         // 初期計算と、短めの定期更新（マーカーが確実に現在地起点で更新されるように）
@@ -78,14 +87,31 @@ export function OrbitPath() {
         return () => clearInterval(interval);
     }, [mapMode]);
 
-    if (points.length === 0) return null;
+    if (segments.length === 0) return null;
 
     return (
         <group>
-            <Line points={points} color="#00f0ff" lineWidth={2} transparent opacity={0.6} depthTest={false} renderOrder={1} />
+            {/* 分割されたOrbitの各セグメントを描画 (2点以上ある場合のみ) */}
+            {segments.map((seg, idx) => (
+                seg.length >= 2 ? (
+                    <Line
+                        key={idx}
+                        points={seg}
+                        color="#00f0ff"
+                        lineWidth={2}
+                        transparent
+                        opacity={0.6}
+                        depthTest={false}
+                        renderOrder={1}
+                        dashed={true}
+                        dashSize={3}
+                        gapSize={2}
+                    />
+                ) : null
+            ))}
 
             {/* 15分ごとに軌道上に時刻マーカーを配置 */}
-            {points.map((pos, index) => {
+            {segments.flatMap(s => s).map((pos, index) => {
                 if (index > 0 && index % 15 === 0) {
                     return (
                         <group key={index} position={pos}>
@@ -93,6 +119,16 @@ export function OrbitPath() {
                                 <sphereGeometry args={[10, 8, 8]} />
                                 <meshBasicMaterial color="#ffcc00" />
                             </mesh>
+                            <Text
+                                position={[0, 150, 0]}
+                                rotation={mapMode === '2D' ? [-Math.PI / 2, 0, 0] : [0, 0, 0]}
+                                fontSize={150}
+                                color="#ffffff"
+                                outlineWidth={6}
+                                outlineColor="#000000"
+                            >
+                                +{(index / 15) * 15}m
+                            </Text>
                         </group>
                     );
                 }

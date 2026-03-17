@@ -8,6 +8,7 @@ export function AdventureLayer() {
     const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [showSkipConfirm, setShowSkipConfirm] = useState(false);
 
     const typingTimerRef = useRef<number | null>(null);
 
@@ -17,6 +18,7 @@ export function AdventureLayer() {
             setCurrentMessageIndex(0);
             setDisplayedText('');
             setIsTyping(false);
+            setShowSkipConfirm(false);
             if (typingTimerRef.current) clearInterval(typingTimerRef.current);
         }
     }, [currentScenarioId]);
@@ -141,6 +143,28 @@ export function AdventureLayer() {
         }
     };
 
+    const handleSkipClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowSkipConfirm(true);
+    };
+
+    const handleSkipCancel = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowSkipConfirm(false);
+    };
+
+    const handleSkipConfirm = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowSkipConfirm(false);
+        // シナリオ強制完了と報酬付与
+        if (scenario.onCompleteReward) {
+            if (scenario.onCompleteReward.score) addScore(scenario.onCompleteReward.score);
+            if (scenario.onCompleteReward.unlockPart) unlockPart(scenario.onCompleteReward.unlockPart);
+            if (scenario.onCompleteReward.newMissions) addMissions(scenario.onCompleteReward.newMissions);
+        }
+        completeScenario();
+    };
+
     // 話者の立ち絵を取得 (emotionに応じて切り替え、無ければnormalをフォールバック)
     const currentEmotion = currentMessage.emotion || 'normal';
     const charData = characters[currentMessage.speaker];
@@ -158,6 +182,27 @@ export function AdventureLayer() {
 
     return (
         <div className={`adv-layer-container ${currentMessage.hideBlur ? 'no-blur' : ''}`} onClick={handleNext}>
+            {/* スキップボタン */}
+            {!showSkipConfirm && (
+                <button className="adv-skip-btn" onClick={handleSkipClick}>
+                    [ ⏩ SKIP ]
+                </button>
+            )}
+
+            {/* スキップ確認ダイアログ */}
+            {showSkipConfirm && (
+                <div className="adv-skip-overlay" onClick={(e) => e.stopPropagation()}>
+                    <div className="adv-skip-dialog">
+                        <h3>シナリオをスキップしますか？</h3>
+                        <p>（報酬や進行状況は正常に付与されます）</p>
+                        <div className="adv-skip-actions">
+                            <button className="adv-skip-btn-cancel" onClick={handleSkipCancel}>[ キャンセル ]</button>
+                            <button className="adv-skip-btn-confirm" onClick={handleSkipConfirm}>[ スキップ実行 ]</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* チュートリアル対象のハイライト枠と矢印 */}
             {highlightRect && (
                 <div className="adv-tutorial-highlight" style={{

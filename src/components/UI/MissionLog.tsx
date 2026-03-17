@@ -83,8 +83,8 @@ export function MissionLog() {
             {previewImage && (
                 <div
                     style={{
-                        position: 'fixed',
-                        top: 0, left: 0, width: '100vw', height: '100vh',
+                        position: 'absolute',
+                        top: 0, left: 0, width: '100%', height: '100%',
                         background: 'rgba(0,0,0,0.85)',
                         backdropFilter: 'blur(5px)',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
